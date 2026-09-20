@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lead Site AI</title>
+<style>
+:root{
+  --bg:#0b0f14; --panel:#111820; --panel2:#161f2a; --border:#22303c;
+  --text:#e8eef4; --muted:#8fa3b3; --accent:#3ddc84; --accent2:#2bb673;
+  --danger:#ff6b6b; --warn:#ffb84d; --radius:14px;
+  padding-top: env(safe-area-inset-top,0px); padding-bottom: env(safe-area-inset-bottom,0px);
+}
+:root:not([data-theme="dark"]){
+  --bg:#f4f7f9; --panel:#ffffff; --panel2:#eef2f5; --border:#dfe6ec; --text:#12202b; --muted:#5d7284;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100%;}
+.app{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--panel);border-right:1px solid var(--border);padding:16px 10px;position:sticky;top:0;height:100vh;flex-shrink:0}
+.brand{font-weight:800;font-size:18px;padding:8px 10px 18px;display:flex;align-items:center;gap:8px}
+.brand span.dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.nav button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;color:var(--muted);padding:10px 12px;border-radius:10px;font-size:14px;cursor:pointer;margin-bottom:2px}
+.nav button.active{background:var(--panel2);color:var(--text);font-weight:600}
+.nav button:hover{color:var(--text)}
+.main{flex:1;padding:20px 24px;max-width:1100px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.topbar h1{font-size:20px;margin:0}
+.pill-btn{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:20px;font-size:12px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.card .label{font-size:12px;color:var(--muted)}
+.card .value{font-size:22px;font-weight:700;margin-top:4px}
+.section-title{font-size:15px;font-weight:700;margin:22px 0 10px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.filters input,.filters select{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:10px;font-size:13px}
+label.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);background:var(--panel2);padding:7px 10px;border-radius:10px;border:1px solid var(--border)}
+.lead-list{display:flex;flex-direction:column;gap:10px}
+.lead{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer}
+.lead:hover{border-color:var(--accent)}
+.lead .name{font-weight:700}
+.lead .meta{font-size:12px;color:var(--muted);margin-top:3px}
+.badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:600}
+.badge.no-site{background:rgba(61,220,132,.15);color:var(--accent)}
+.badge.has-site{background:rgba(255,107,107,.15);color:var(--danger)}
+.badge.unknown{background:rgba(255,184,77,.15);color:var(--warn)}
+.btn{background:var(--accent);color:#08130d;border:none;padding:9px 14px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer}
+.btn.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
+.btn.small{padding:6px 10px;font-size:12px}
+.detail-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:6px;font-size:13px;margin:4px 0}
+.kv b{color:var(--muted);font-weight:500}
+.score{font-size:13px;color:var(--muted);margin-top:8px}
+textarea{width:100%;min-height:100px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px;font-size:13px;margin-top:8px}
+.kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px}
+.kcol{min-width:190px;background:var(--panel2);border-radius:var(--radius);padding:10px;flex-shrink:0}
+.kcol h4{font-size:12px;margin:2px 4px 10px;color:var(--muted);text-transform:uppercase}
+.kcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;font-size:12px}
+.kcard .n{font-weight:700;font-size:13px;margin-bottom:4px}
+.kcard select{width:100%;margin-top:6px;font-size:11px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.plan{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer}
+.plan.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.plan h3{margin:0 0 6px}
+.plan .price{font-size:22px;font-weight:800;color:var(--accent);margin:6px 0}
+.plan ul{margin:0;padding-left:18px;font-size:12px;color:var(--muted)}
+.preview-frame{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:16px}
+.pv-hero{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#08130d;padding:36px 20px;text-align:center}
+.pv-hero h2{margin:0 0 6px;font-size:24px}
+.pv-sec{padding:20px;border-top:1px solid var(--border)}
+.pv-sec h4{margin:0 0 8px}
+.demo-tag{display:inline-block;background:var(--warn);color:#3a2a00;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;vertical-align:middle;margin-left:6px}
+.hidden{display:none}
+@media(max-width:760px){
+  .app{flex-direction:column}
+  .sidebar{width:100%;height:auto;position:sticky;top:0;display:flex;overflow-x:auto;padding:10px}
+  .brand{display:none}
+  .nav{display:flex;gap:4px}
+  .nav button{white-space:nowrap;width:auto}
+  .main{padding:14px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="brand"><span class="dot"></span> Lead Site AI</div>
+    <div class="nav" id="nav">
+      <button data-view="dashboard" class="active">📊 Dashboard</button>
+      <button data-view="leads">🔍 Buscar Leads</button>
+      <button data-view="crm">📋 CRM</button>
+      <button data-view="sites">🌐 Criar Site</button>
+      <button data-view="config">⚙️ Configurações</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <h1 id="pageTitle">Dashboard</h1>
+      <div style="display:flex;gap:8px">
+        <button class="pill-btn" onclick="toggleTheme()">🌓 Tema</button>
+        <select class="pill-btn" id="currencySel" onchange="render()">
+          <option value="BRL">R$ BRL</option>
+          <option value="USD">US$ USD</option>
+          <option value="EUR">€ EUR</option>
+        </select>
+      </div>
+    </div>
+    <div id="view"></div>
+  </div>
+</div>
+
+<script>
+const CUR = { BRL:{s:'R$',rate:1}, USD:{s:'US$',rate:0.19}, EUR:{s:'€',rate:0.17} };
+const RATE_DATE = '19/09/2026 (demo)';
+function price(basePriceBRL){
+  const c = CUR[document.getElementById('currencySel').value];
+  return c.s + ' ' + Math.round(basePriceBRL*c.rate).toLocaleString();
+}
+
+const LEADS = [
+  {id:1,name:'Academia Corpo Ativo',niche:'Academia',city:'Itabaiana/SE',country:'Brasil',phone:'(79) 99900-1122',whatsapp:'5579999001122',instagram:'@corpoativo',site:'no-site',rating:4.6,reviews:87,score:35,stage:'novo'},
+  {id:2,name:'Pizzaria Bella Napoli',niche:'Pizzaria',city:'Boquim/SE',country:'Brasil',phone:'(79) 98811-3344',whatsapp:'5579988113344',instagram:'@bellanapolibqm',site:'no-site',rating:4.8,reviews:203,score:35,stage:'qualificado'},
+  {id:3,name:'Oficina Silva Motors',niche:'Oficina mecânica',city:'Maceió/AL',country:'Brasil',phone:'(82) 99700-5566',whatsapp:'',instagram:'',site:'unknown',rating:4.2,reviews:19,score:15,stage:'novo'},
+  {id:4,name:'Salão Bella Hair',niche:'Salão de beleza',city:'Aracaju/SE',country:'Brasil',phone:'(79) 99650-7788',whatsapp:'5579996507788',instagram:'@bellahairse',site:'has-site',rating:4.9,reviews:340,score:5,stage:'novo'},
+  {id:5,name:'PetLove Miami',niche:'Pet shop',city:'Miami/FL',country:'Estados Unidos',phone:'+1 305-555-0199',whatsapp:'13055550199',instagram:'@petlovemia',site:'no-site',rating:4.4,reviews:56,score:30,stage:'contatado'},
+];
+const STAGES = ['novo','qualificado','contatado','interessado','proposta','negociacao','cliente'];
+const STAGE_LABEL = {novo:'Novo',qualificado:'Qualificado',contatado:'Contatado',interessado:'Interessado',proposta:'Proposta',negociacao:'Negociação',cliente:'Cliente'};
+const PLANS = [
+  {id:'basico',name:'Básico',priceBRL:497,items:['Página inicial, Sobre, Serviços, Contato','WhatsApp + Google Maps','Design responsivo','SEO básico']},
+  {id:'profissional',name:'Profissional',priceBRL:997,items:['Tudo do Básico','Galeria de fotos + Depoimentos','FAQ + Formulário de contato','Animações modernas']},
+  {id:'premium',name:'Premium',priceBRL:1997,items:['Tudo do Profissional','Múltiplas páginas + Blog','Agendamento (quando aplicável)','SEO avançado + Analytics']},
+];
+
+const NICHE_MAP = {
+  'pizzaria':[{k:'amenity',v:'restaurant'},{k:'cuisine',v:'pizza'}],
+  'restaurante':[{k:'amenity',v:'restaurant'}],
+  'barbearia':[{k:'shop',v:'hairdresser'},{k:'shop',v:'barber'}],
+  'salão de beleza':[{k:'shop',v:'beauty'},{k:'shop',v:'hairdresser'}],
+  'salao de beleza':[{k:'shop',v:'beauty'},{k:'shop',v:'hairdresser'}],
+  'loja de roupas':[{k:'shop',v:'clothes'}],
+  'oficina':[{k:'shop',v:'car_repair'}],
+  'clínica':[{k:'amenity',v:'clinic'},{k:'healthcare',v:'clinic'}],
+  'clinica':[{k:'amenity',v:'clinic'},{k:'healthcare',v:'clinic'}],
+  'academia':[{k:'leisure',v:'fitness_centre'}],
+  'pet shop':[{k:'shop',v:'pet'}],
+  'padaria':[{k:'shop',v:'bakery'}],
+  'farmácia':[{k:'amenity',v:'pharmacy'}],
+  'farmacia':[{k:'amenity',v:'pharmacy'}],
+  'dentista':[{k:'amenity',v:'dentist'}],
+  'hotel':[{k:'tourism',v:'hotel'}],
+  'imobiliária':[{k:'office',v:'estate_agent'}],
+  'imobiliaria':[{k:'office',v:'estate_agent'}],
+};
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.openstreetmap.ru/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter'
+];
+async function fetchWithTimeout(url, opts, ms){
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>ctrl.abort(), ms);
+  try{ return await fetch(url, {...opts, signal: ctrl.signal}); }
+  finally{ clearTimeout(t); }
+}
+async function queryOverpass(cityRaw, nicheRaw){
+  const city = cityRaw.split(',')[0].trim();
+  const nicheKey = nicheRaw.trim().toLowerCase();
+  const tags = NICHE_MAP[nicheKey];
+  let filters;
+  if(tags){
+    filters = tags.map(t=>`nwr["${t.k}"="${t.v}"](area.a);`).join('\n');
+  } else {
+    const w = nicheRaw.trim();
+    filters = `nwr["shop"~"${w}",i](area.a);\nnwr["amenity"~"${w}",i](area.a);\nnwr["name"~"${w}",i](area.a);`;
+  }
+  const query = `[out:json][timeout:25];\narea["name"="${city}"]->.a;\n(\n${filters}\n);\nout center tags 40;`;
+
+  let lastErr = null;
+  for(const endpoint of OVERPASS_ENDPOINTS){
+    try{
+      const res = await fetchWithTimeout(endpoint, {
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'data=' + encodeURIComponent(query),
+        mode:'cors'
+      }, 12000);
+      if(!res.ok) throw new Error('http_'+res.status);
+      const data = await res.json();
+      return (data.elements||[]).filter(el=>el.tags && el.tags.name).map(el=>{
+        const t = el.tags;
+        const lat = el.lat!==undefined?el.lat:(el.center&&el.center.lat);
+        const lon = el.lon!==undefined?el.lon:(el.center&&el.center.lon);
+        const website = t.website || t['contact:website'] || '';
+        return {
+          name:t.name, niche:t.shop||t.amenity||t.craft||t.leisure||nicheRaw,
+          address:[t['addr:street'],t['addr:housenumber']].filter(Boolean).join(', '),
+          city:t['addr:city']||city, phone:t.phone||t['contact:phone']||'',
+          website, lat, lon, hasSite: !!website
+        };
+      });
+    }catch(e){
+      lastErr = e; continue; // tenta o próximo endpoint
+    }
+  }
+  throw new Error('todos os endpoints Overpass falharam ('+(lastErr&&lastErr.message||lastErr)+')');
+}
+let realResults = null, realSearchState = 'idle', realSearchError = '';
+async function runRealSearch(city, niche, onlyNoSite){
+  realSearchState = 'loading'; realResults = null; render();
+  try{
+    let r = await queryOverpass(city, niche);
+    if(onlyNoSite) r = r.filter(x=>!x.hasSite);
+    realResults = r; realSearchState = 'done';
+  }catch(e){
+    realSearchState = 'error'; realSearchError = String(e.message||e);
+  }
+  render();
+}
+function addRealToCRM(idx){
+  const r = realResults[idx];
+  const id = Math.max(0,...LEADS.map(l=>l.id))+1;
+  let score = 10; if(!r.hasSite) score+=10; if(r.phone) score+=5; if(r.address) score+=5;
+  LEADS.push({id,name:r.name,niche:r.niche,city:r.city,country:'',phone:r.phone||'—',whatsapp:'',instagram:'',site:r.hasSite?'has-site':'no-site',rating:0,reviews:0,score,stage:'novo'});
+  alert('Adicionado ao CRM: '+r.name);
+}
+let state = { view:'dashboard', selectedLead:null, selectedPlan:'profissional', siteLeadId:null };
+let aiReady = null;
+async function getAI(){
+  if(aiReady!==null) return aiReady;
+  try{ aiReady = await claude.use('sample'); }catch(e){ aiReady = null; }
+  return aiReady;
+}
+getAI();
+function edit(id){
+  if(!siteEdits[id]){
+    const l = LEADS.find(x=>x.id===id);
+    siteEdits[id] = {
+      title:l.name, primary:'#3ddc84', secondary:'#2bb673',
+      about:`${l.name} atende a região de ${l.city}, com avaliação ⭐ ${l.rating} de ${l.reviews} clientes. [Texto editável — complementar com informações reais fornecidas pelo cliente.]`
+    };
+  }
+  return siteEdits[id];
+}
+
+function toggleTheme(){
+  const r=document.documentElement;
+  r.setAttribute('data-theme', r.getAttribute('data-theme')==='dark' ? 'light':'dark');
+}
+
+document.getElementById('nav').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  state.view = b.dataset.view;
+  state.selectedLead = null;
+  render();
+});
+
+function siteBadge(s){
+  if(s==='no-site') return '<span class="badge no-site">Sem site (confirmado)</span>';
+  if(s==='has-site') return '<span class="badge has-site">Já possui site</span>';
+  return '<span class="badge unknown">Não encontrado (não confirmado)</span>';
+}
+
+function render(){
+  const v = document.getElementById('view');
+  document.getElementById('pageTitle').textContent = {
+    dashboard:'Dashboard', leads:'Buscar Leads', crm:'CRM', sites:'Criar Site', config:'Configurações'
+  }[state.view];
+
+  if(state.view==='dashboard') return renderDashboard(v);
+  if(state.view==='leads') return state.selectedLead ? renderLeadDetail(v) : renderLeads(v);
+  if(state.view==='crm') return renderCRM(v);
+  if(state.view==='sites') return renderSites(v);
+  if(state.view==='config') return renderConfig(v);
+}
+
+function renderDashboard(v){
+  const semSite = LEADS.filter(l=>l.site==='no-site').length;
+  const clientes = LEADS.filter(l=>l.stage==='cliente').length;
+  v.innerHTML = `
+    <div class="grid">
+      <div class="card"><div class="label">Leads encontrados <span class="demo-tag">DEMO</span></div><div class="value">${LEADS.length}</div></div>
+      <div class="card"><div class="label">Sem website</div><div class="value">${semSite}</div></div>
+      <div class="card"><div class="label">Sites criados</div><div class="value">1</div></div>
+      <div class="card"><div class="label">Clientes ganhos</div><div class="value">${clientes}</div></div>
+      <div class="card"><div class="label">Receita potencial</div><div class="value">${price(semSite*997)}</div></div>
+      <div class="card"><div class="label">Países pesquisados</div><div class="value">2</div></div>
+    </div>
+    <div class="section-title">Fluxo</div>
+    <div class="detail-box" style="font-size:13px;color:var(--muted)">
+      Buscar leads → filtrar sem site → CRM (qualificar/contatar) → criar site com IA → escolher plano → preview → publicar. Use o menu lateral para navegar entre as etapas.
+    </div>`;
+}
+
+function renderLeads(v){
+  const cityFilter = state.cityFilter||'';
+  const nicheFilter = state.nicheFilter||'';
+  const onlyNoSite = state.onlyNoSite!==false;
+  v.innerHTML = `
+    <div class="filters">
+      <input placeholder="Cidade (ex: Boquim, SE)" id="fCity" value="${cityFilter}">
+      <input placeholder="Nicho (ex: pizzaria, barbearia)" id="fNiche" value="${nicheFilter}">
+      <label class="chk"><input type="checkbox" id="fNoSite" ${onlyNoSite?'checked':''}> Somente sem site</label>
+      <button class="btn" onclick="applyFilters()">Buscar</button>
+    </div>
+    <div id="resultsArea"></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:10px">Fonte: OpenStreetMap (Overpass API) — dados públicos e abertos, sem chave paga. Empresa não listada no OSM não significa necessariamente que ela não existe.</div>
+  `;
+  renderResultsArea();
+}
+function renderResultsArea(){
+  const el = document.getElementById('resultsArea'); if(!el) return;
+  if(realSearchState==='idle'){ el.innerHTML = '<div class="detail-box">Informe cidade e nicho e clique em Buscar.</div>'; return; }
+  if(realSearchState==='loading'){ el.innerHTML = '<div class="detail-box">🔎 Buscando no OpenStreetMap...</div>'; return; }
+  if(realSearchState==='error'){
+    el.innerHTML = `<div class="detail-box">Não foi possível concluir a busca agora. Todos os endpoints públicos da Overpass API testados falharam ou estão indisponíveis no momento (${realSearchError}). Isso não é um problema do seu domínio/Netlify — pode ser instabilidade temporária dos servidores públicos da Overpass. Tente novamente em alguns instantes.</div>`;
+    return;
+  }
+  if(!realResults || realResults.length===0){ el.innerHTML = '<div class="detail-box">Nenhum resultado real encontrado para essa cidade/nicho no OpenStreetMap.</div>'; return; }
+  el.innerHTML = `<div class="lead-list">${realResults.map((r,i)=>`
+    <div class="lead">
+      <div>
+        <div class="name">${r.name}</div>
+        <div class="meta">${r.niche}${r.address?' · '+r.address:''}${r.city?' · '+r.city:''}${r.phone?' · '+r.phone:''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${r.hasSite?'<span class="badge has-site">Tem site</span>':'<span class="badge no-site">Sem site informado</span>'}
+        <button class="btn small" onclick="addRealToCRM(${i})">+ CRM</button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+function applyFilters(){
+  state.cityFilter = document.getElementById('fCity').value;
+  state.nicheFilter = document.getElementById('fNiche').value;
+  state.onlyNoSite = document.getElementById('fNoSite').checked;
+  if(!state.cityFilter || !state.nicheFilter){ alert('Informe cidade e nicho.'); return; }
+  runRealSearch(state.cityFilter, state.nicheFilter, state.onlyNoSite);
+}
+function openLead(id){ state.selectedLead = id; render(); }
+
+function renderLeadDetail(v){
+  const l = LEADS.find(x=>x.id===state.selectedLead);
+  v.innerHTML = `
+    <button class="btn secondary small" onclick="state.selectedLead=null;render()">← Voltar</button>
+    <div class="detail-box" style="margin-top:12px">
+      <h2 style="margin-top:0">${l.name} ${siteBadge(l.site)}</h2>
+      <div class="kv"><b>Nicho</b><span>${l.niche}</span></div>
+      <div class="kv"><b>Cidade</b><span>${l.city} — ${l.country}</span></div>
+      <div class="kv"><b>Telefone</b><span>${l.phone}</span></div>
+      <div class="kv"><b>Instagram</b><span>${l.instagram||'—'}</span></div>
+      <div class="kv"><b>Avaliação</b><span>⭐ ${l.rating} (${l.reviews} avaliações)</span></div>
+      <div class="score">Pontuação de oportunidade: <b>${l.score}</b> — indicativo, não é garantia de venda.</div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        ${l.whatsapp?`<a class="btn" style="text-decoration:none" target="_blank" href="https://wa.me/${l.whatsapp}?text=${encodeURIComponent('Olá! Tudo bem? Encontrei a sua empresa durante uma pesquisa na região e preparei uma ideia de site profissional para apresentar melhor o seu negócio na internet. Gostaria de ver o exemplo?')}">Abrir WhatsApp</a>`:''}
+        <button class="btn secondary" onclick="genMessage(${l.id})">Gerar abordagem</button>
+        <button class="btn secondary" onclick="state.siteLeadId=${l.id};state.view='sites';document.querySelector('[data-view=sites]').click()">Criar site para este lead</button>
+      </div>
+      <textarea id="msgOut" class="hidden"></textarea>
+    </div>`;
+}
+async function genMessage(id){
+  const l = LEADS.find(x=>x.id===id);
+  const t = document.getElementById('msgOut');
+  t.classList.remove('hidden');
+  const fallback = `Olá! Encontrei a ${l.name} durante uma pesquisa na região de ${l.city}. Vi que vocês têm uma presença interessante e percebi que atualmente não encontrei um site oficial da empresa.\n\nEu trabalho com criação de sites profissionais e preparei uma proposta que poderia ajudar a empresa a apresentar seus serviços, localização e contatos.\n\nPosso te mostrar uma prévia de como poderia ficar?`;
+  const ai = await getAI();
+  if(!ai){ t.value = fallback; return; }
+  t.value = 'Gerando com IA...';
+  try{
+    const r = await ai(`Escreva uma mensagem curta e simpática em português (WhatsApp) para abordar o dono de "${l.name}" (${l.niche}, ${l.city}), avisando que encontramos a empresa numa pesquisa, que ela não tem site, e oferecendo mostrar uma prévia de um site profissional. Tom cordial, sem parecer spam, no máximo 5 frases.`);
+    t.value = r.text || fallback;
+  }catch(e){ t.value = fallback; }
+}
+
+function renderCRM(v){
+  v.innerHTML = `<div class="kanban">${STAGES.map(s=>`
+    <div class="kcol">
+      <h4>${STAGE_LABEL[s]}</h4>
+      ${LEADS.filter(l=>l.stage===s).map(l=>`
+        <div class="kcard">
+          <div class="n">${l.name}</div>
+          <div style="color:var(--muted)">${l.niche} · ${l.city}</div>
+          <select onchange="moveStage(${l.id},this.value)">
+            ${STAGES.map(st=>`<option value="${st}" ${st===s?'selected':''}>${STAGE_LABEL[st]}</option>`).join('')}
+          </select>
+        </div>`).join('') || '<div style="font-size:11px;color:var(--muted)">Vazio</div>'}
+    </div>`).join('')}</div>`;
+}
+function moveStage(id,stage){
+  const l = LEADS.find(x=>x.id===id); l.stage = stage; render();
+}
+
+function renderSites(v){
+  const leadId = state.siteLeadId || LEADS[0].id;
+  const l = LEADS.find(x=>x.id===leadId);
+  const plan = PLANS.find(p=>p.id===state.selectedPlan);
+  const e = edit(leadId);
+  v.innerHTML = `
+    <div class="filters">
+      <select onchange="state.siteLeadId=Number(this.value);render()">
+        ${LEADS.map(x=>`<option value="${x.id}" ${x.id===leadId?'selected':''}>${x.name}</option>`).join('')}
+      </select>
+      <button class="pill-btn" onclick="edit(${leadId}).editing=!edit(${leadId}).editing;render()" id="editToggleBtn">${e.editing?'Fechar editor':'✏️ Editor visual'}</button>
+    </div>
+    <div class="plans">
+      ${PLANS.map(p=>`
+        <div class="plan ${p.id===state.selectedPlan?'selected':''}" onclick="state.selectedPlan='${p.id}';render()">
+          <h3>${p.name}</h3>
+          <div class="price">${price(p.priceBRL)}<span style="font-size:11px;color:var(--muted)"> /site</span></div>
+          <ul>${p.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+        </div>`).join('')}
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">Câmbio ilustrativo (${RATE_DATE}) — não é taxa oficial.</div>
+
+    ${e.editing?`
+    <div class="section-title">Editor visual</div>
+    <div class="detail-box">
+      <div class="kv"><b>Título / Nome</b><input value="${e.title}" oninput="edit(${leadId}).title=this.value;livePreview(${leadId})"></div>
+      <div class="kv"><b>Cor primária</b><input type="color" value="${e.primary}" oninput="edit(${leadId}).primary=this.value;livePreview(${leadId})"></div>
+      <div class="kv"><b>Cor secundária</b><input type="color" value="${e.secondary}" oninput="edit(${leadId}).secondary=this.value;livePreview(${leadId})"></div>
+      <div style="margin-top:8px"><b style="font-size:13px;color:var(--muted)">Texto "Sobre"</b>
+        <textarea id="aboutInput" oninput="edit(${leadId}).about=this.value;livePreview(${leadId})">${e.about}</textarea>
+      </div>
+      <button class="btn secondary small" style="margin-top:8px" onclick="regenSection(${leadId})">🔄 Regenerar seção com IA</button>
+    </div>`:''}
+
+    <div class="section-title">Prévia do site (gerado com dados do lead) <span class="demo-tag">DEMO</span></div>
+    <div class="preview-frame" id="pvFrame">
+      <div class="pv-hero" id="pvHero" style="background:linear-gradient(135deg,${e.secondary},${e.primary})"><h2 id="pvTitle">${e.title}</h2><div>${l.niche} · ${l.city}</div></div>
+      <div class="pv-sec"><h4>Sobre</h4><p id="pvAbout" style="font-size:13px;color:var(--muted)">${e.about}</p></div>
+      ${plan.id!=='basico'?'<div class="pv-sec"><h4>Galeria / Depoimentos</h4><p style="font-size:13px;color:var(--muted)">[Seção incluída no plano '+plan.name+']</p></div>':''}
+      ${plan.id==='premium'?'<div class="pv-sec"><h4>Blog / Agendamento</h4><p style="font-size:13px;color:var(--muted)">[Recursos premium — configurar conforme o nicho]</p></div>':''}
+      <div class="pv-sec"><h4>Contato</h4><p style="font-size:13px;color:var(--muted)">${l.phone} · ${l.instagram||'—'}</p></div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn secondary">Enviar prévia para cliente</button>
+      <button class="btn">Publicar site</button>
+    </div>`;
+}
+function livePreview(id){
+  const e = edit(id);
+  const hero=document.getElementById('pvHero'), title=document.getElementById('pvTitle'), about=document.getElementById('pvAbout');
+  if(hero) hero.style.background = `linear-gradient(135deg,${e.secondary},${e.primary})`;
+  if(title) title.textContent = e.title;
+  if(about) about.textContent = e.about;
+}
+async function regenSection(id){
+  const l = LEADS.find(x=>x.id===id);
+  const variants = [
+    `Na ${l.name}, unimos experiência e atendimento de qualidade para servir ${l.city} há anos. Avaliada com ⭐ ${l.rating} por clientes satisfeitos, a empresa é referência no segmento de ${l.niche}.`,
+    `Bem-vindo à ${l.name}! Localizada em ${l.city}, nossa equipe é reconhecida pela dedicação e qualidade no setor de ${l.niche} — nota ⭐ ${l.rating} em ${l.reviews} avaliações.`
+  ];
+  const fallback = variants[Math.floor(Math.random()*variants.length)];
+  const ai = await getAI();
+  if(!ai){ edit(id).about = fallback; render(); return; }
+  edit(id).about = 'Gerando com IA...'; render();
+  try{
+    const r = await ai(`Escreva um parágrafo curto (2-3 frases) em português para a seção "Sobre" de um site institucional de "${l.name}", negócio do tipo ${l.niche} em ${l.city}, avaliação ⭐ ${l.rating} (${l.reviews} avaliações). Tom profissional e acolhedor, sem inventar dados que não foram dados.`);
+    edit(id).about = r.text || fallback;
+  }catch(e){ edit(id).about = fallback; }
+  render();
+}
+
+
+function renderConfig(v){
+  v.innerHTML = `
+    <div class="detail-box">
+      <div class="section-title" style="margin-top:0">Chaves de API (placeholder)</div>
+      <div class="kv"><b>Fonte de leads</b><span>não configurada — usando dados DEMO</span></div>
+      <div class="kv"><b>Provedor de IA</b><span id="aiStatus">verificando...</span></div>
+      <div class="kv"><b>Gateway de pagamento</b><span>não configurado</span></div>
+      <p style="font-size:12px;color:var(--muted)">Este MVP mostra o fluxo completo com dados de demonstração. "Gerar abordagem" e "Regenerar seção com IA" já usam o provedor de IA nativo quando disponível. Conecte fontes reais de leads e pagamento para uso em produção.</p>
+    </div>`;
+  getAI().then(ai=>{
+    const el = document.getElementById('aiStatus');
+    if(el) el.textContent = ai ? '✅ ativo (IA nativa)' : '⚠️ indisponível nesta visualização — usando textos padrão';
+  });
+}
+
+render();
+</script>
+</body>
+</html>
